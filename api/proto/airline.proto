@@ -1,0 +1,80 @@
+syntax = "proto3";
+package auth;
+
+option go_package = "/airlinepb";
+import "google/protobuf/timestamp.proto";
+
+service AirlineService {
+  rpc CreateArline (CreateArlineRequest) returns (AirlineResponse);
+  rpc GetListAirline (GetListAirlineRequest) returns (GetListAirlineResponse);
+  rpc GetAirline (GetAirlineRequest) returns (GetAirlineResponse);
+  rpc UpdateAirline (UpdateAirlineRequest) returns (AirlineResponse);
+  rpc DeleteAirline (DeleteAirlineRequest) returns (AirlineResponse);
+  rpc AirlineGetFlights (AirlineGetFlightRequest) returns (AirlineGetFlightResponse);
+}
+
+message CreateArlineRequest {
+  string airlineName = 1;
+  string airlineCode = 2;
+  string country = 3;
+}
+
+message UpdateAirlineRequest {
+  string airlineName = 1;
+  string airlineCode = 2;
+  string country = 3;
+  string airlineId = 4;
+}
+
+message GetListAirlineRequest {
+}
+
+message DeleteAirlineRequest {
+  string airlineId = 1;
+}
+
+message GetAirlineRequest {
+  string airlineId = 1;
+}
+
+message GetAirlineResponse {
+  Airline airline = 1;
+}
+
+message GetListAirlineResponse {
+  repeated Airline airlines = 1;
+}
+
+message AirlineResponse {
+  string error = 1;
+}
+
+message Airline {
+  string airlineName = 1;
+  string airlineCode = 2;
+  string country = 3;
+  string id = 4;
+}
+
+message AirlineGetFlightRequest{
+  string airlineId = 1;
+}
+
+message AirlineGetFlightResponse{
+  repeated FlightAL flights = 1;
+  string error = 2;
+}
+
+message FlightAL {
+  string FlightNumber = 1;
+  uint32 DepartureAirportID = 2;
+  uint32 ArrivalAirportID = 3;
+  google.protobuf.Timestamp DepartureTime = 4;
+  google.protobuf.Timestamp ArrivalTime = 5;
+  uint32 AvailableSeats = 6;
+  uint32 Duration = 7;
+  string Status = 8;
+  google.protobuf.Timestamp UpdatedDepartureTime = 9;
+  google.protobuf.Timestamp UpdatedArrivalTime = 10;
+  string Reason = 11;
+}

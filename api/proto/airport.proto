@@ -1,0 +1,106 @@
+syntax = "proto3";
+package auth;
+import "google/protobuf/timestamp.proto";
+option go_package = "/airportpb";
+
+service AirportService {
+  rpc CreateAirport (CreateAirportRequest) returns (AirportResponse);
+  rpc GetListAirports (GetListAirportRequest) returns (GetListAirportResponse);
+  rpc GetAirport (GetAirportRequest) returns (GetAirportResponse);
+  rpc UpdateAirport (UpdateAirportRequest) returns (AirportResponse);
+  rpc DeleteAirport (DeleteAirportRequest) returns (AirportResponse);
+  rpc AirportGetDepartureFlights (AirportGetDepartureFlightRequest) returns (AirportGetDepartureFlightResponse);
+  rpc AirportGetArrivalFlights (AirportGetArrivalFlightRequest) returns (AirportGetArrivalFlightResponse);
+  rpc AirportGetDepartureFlightsAndArrivalFlights (AirportGetDepartureFlightsAndArrivalFlightRequest) returns (AirportGetDepartureFlightsAndArrivalFlightResponse);
+}
+
+message AirportGetDepartureFlightsAndArrivalFlightRequest {
+  uint32 DepartureAirportId = 1;
+  uint32 ArrivalAirportId = 2;
+}
+
+message AirportGetDepartureFlightsAndArrivalFlightResponse {
+  repeated Flight flights = 1;
+  string error = 2;
+}
+
+message CreateAirportRequest {
+  string airportCode = 1;
+  string airportName = 2;
+  string country = 3;
+  string city = 4;
+}
+
+message GetListAirportRequest{
+
+}
+
+message GetListAirportResponse {
+  repeated Airport airports = 1;
+}
+
+message GetAirportRequest{
+  string airportId = 1;
+}
+
+message GetAirportResponse{
+  Airport airport = 1;
+}
+
+message UpdateAirportRequest{
+  string airportCode = 1;
+  string airportName = 2;
+  string country = 3;
+  string city = 4;
+  string airportId = 5;
+}
+
+message DeleteAirportRequest {
+  string airportId = 1;
+}
+
+message Airport {
+  string airportCode = 1;
+  string airportName = 2;
+  string country = 3;
+  string city = 4;
+  string id = 5;
+}
+
+message AirportResponse {
+  string error = 1;
+}
+
+message AirportGetDepartureFlightRequest {
+  uint32 airportId = 1;
+}
+
+message AirportGetDepartureFlightResponse {
+  repeated Flight flights = 1;
+  string error = 2;
+}
+
+message AirportGetArrivalFlightRequest {
+  uint32 airportId = 1;
+}
+
+message AirportGetArrivalFlightResponse {
+  repeated Flight flights = 1;
+  string error = 2;
+}
+
+message Flight {
+  string FlightNumber = 1;
+  uint32 DepartureAirportID = 2;
+  uint32 ArrivalAirportID = 3;
+  google.protobuf.Timestamp DepartureTime = 4;
+  google.protobuf.Timestamp ArrivalTime = 5;
+  uint32 AvailableSeats = 6;
+  uint32 Duration = 7;
+  string Status = 8;
+  google.protobuf.Timestamp UpdatedDepartureTime = 9;
+  google.protobuf.Timestamp UpdatedArrivalTime = 10;
+  string Reason = 11;
+  string Airline = 12;
+  string id = 13;
+}

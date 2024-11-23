@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package auth;
+import "google/protobuf/timestamp.proto";
+
+option go_package = "/flightpb";
+
+service FlightService {
+  rpc CreateFlight (CreateFlightRequest) returns (CreateFlightResponse);
+  rpc RescheduleFlight (RescheduleFlightRequest) returns (RescheduleFlightResponse);
+  rpc GetFlightSeats (GetFlightSeatRequest) returns (GetFlightSeatResponse);
+  rpc GetFlights (GetFlightRequest) returns (GetFlightResponse);
+}
+
+message GetFlightRequest {
+
+}
+
+message GetFlightResponse {
+  repeated RescheduleFlightResponse flights = 1;
+  string error = 2;
+}
+
+message GetFlightSeatRequest {
+  uint32 FlightID = 1;
+}
+
+message GetFlightSeatResponse {
+  repeated SeatF Seats = 1;
+  string Error = 2;
+}
+
+message SeatF{
+  string SeatNumber = 1;
+  string SeatClass = 2;
+  bool IsAvailable = 3;
+  double Price = 4;
+  uint32 ID = 5;
+}
+
+message CreateFlightRequest {
+  uint32 DepartureAirportID = 1;
+  uint32 ArrivalAirportID = 2;
+  google.protobuf.Timestamp DepartureTime = 3;
+  google.protobuf.Timestamp ArrivalTime = 4;
+  uint32 AvailableSeats = 5;
+  uint32 AirlineID = 6;
+}
+
+message CreateFlightResponse {
+  string FlightNumber = 1;
+  AirportF DepartureAirport = 2;
+  AirportF ArrivalAirport = 3;
+  google.protobuf.Timestamp DepartureTime = 4;
+  google.protobuf.Timestamp ArrivalTime = 5;
+  uint32 AvailableSeats = 6;
+  uint32 Duration = 7;
+  string Status = 8;
+  AirlineF Airline = 9;
+  string Error = 10;
+}
+
+message AirportF {
+  string AirportCode = 1;
+  string AirportName = 2;
+  string Country = 3;
+  string City = 4;
+}
+
+message RescheduleFlightRequest {
+  uint32 FlightID = 1;
+  google.protobuf.Timestamp UpdatedDepartureTime = 2;
+  google.protobuf.Timestamp UpdatedArrivalTime = 3;
+  string Reason = 4;
+}
+
+message RescheduleFlightResponse {
+  string FlightNumber = 1;
+  AirportF DepartureAirport = 2;
+  AirportF ArrivalAirport = 3;
+  google.protobuf.Timestamp DepartureTime = 4;
+  google.protobuf.Timestamp ArrivalTime = 5;
+  uint32 AvailableSeats = 6;
+  uint32 Duration = 7;
+  string Status = 8;
+  google.protobuf.Timestamp UpdatedDepartureTime = 9;
+  google.protobuf.Timestamp UpdatedArrivalTime = 10;
+  string Reason = 11;
+  AirlineF Airline = 12;
+  string Error = 13;
+  uint32 ID = 14;
+}
+
+message AirlineF {
+  string AirlineCode = 1;
+  string AirlineName = 2;
+  string Country = 3;
+}

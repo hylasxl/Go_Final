@@ -1,0 +1,105 @@
+syntax = "proto3";
+package auth;
+
+import "google/protobuf/timestamp.proto";
+option go_package = "/reservationpb";
+
+service ReservationService {
+  rpc BookFlight(BookFlightRequest) returns (BookFlightResponse);
+  rpc CancelTicket(CancelTicketRequest) returns (CancelTicketResponse);
+  rpc GetUserTickets(GetUserTicketRequest) returns (GetUserTicketResponse);
+  rpc GetTickets (GetTicketRequest) returns (GetTicketResponse);
+}
+
+message BookFlightRequest{
+  uint32 userId = 1;
+  uint32 flightId = 2;
+  uint32 seatId = 3;
+  uint32 passportId = 4;
+}
+
+message BookFlightResponse{
+  uint32 reservationId = 1;
+  string seatNumber = 2;
+  string ticketNumber = 3;
+  uint32 price = 4;
+  google.protobuf.Timestamp issueDate = 5;
+  string passengerName = 6;
+  string passengerPhonenumber = 7;
+  string passengerEmail = 8;
+  string error = 9;
+}
+
+message GetTicketRequest {
+
+}
+
+message GetTicketResponse {
+  repeated Ticket tickets = 1;
+  string error = 2;
+}
+
+message CancelTicketRequest {
+  uint32 userId = 1;
+  uint32 ticketId = 2;
+}
+
+message CancelTicketResponse {
+  string error = 1;
+}
+
+message GetUserTicketRequest {
+  uint32 userId = 1;
+}
+
+message GetUserTicketResponse {
+  repeated Ticket Tickets = 1;
+  string error = 2;
+}
+
+message Ticket {
+  TReservation Reservation = 1;
+  TSeat Seat = 2;
+  TFlight Flight = 3;
+  string TicketNumber = 4;
+  float Price = 5;
+  uint32 TicketID = 6;
+  google.protobuf.Timestamp IssueDate = 7;
+  uint32 UserID = 8;
+}
+
+message TReservation {
+  uint32 ID = 1;
+  google.protobuf.Timestamp ReservationDate = 2;
+  string ReservationStatus = 3;
+  int32 PassportID = 4;
+}
+
+message TSeat {
+  uint32 ID = 1;
+  string SeatNumber = 2;
+  string SeatClass = 3;
+}
+
+message TFlight{
+  string FlightNumber = 1;
+  TAirport DepartureAirport = 2;
+  TAirport ArrivalAirport = 3;
+  google.protobuf.Timestamp DepartureTime = 4;
+  google.protobuf.Timestamp ArrivalTime = 5;
+  uint32 AvailableSeats = 6;
+  uint32 Duration = 7;
+  string Status = 8;
+  google.protobuf.Timestamp UpdatedDepartureTime = 9;
+  google.protobuf.Timestamp UpdatedArrivalTime = 10;
+  string Reason = 11;
+  uint32 ID = 12;
+}
+
+message TAirport{
+  string airportCode = 1;
+  string airportName = 2;
+  string country = 3;
+  string city = 4;
+  string id = 5;
+}
