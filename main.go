@@ -71,9 +71,9 @@ func main() {
 }
 
 func startGRPCServer(database *gorm.DB, rdb *redis.Client) {
-	lis, err := net.Listen("tcp", "0.0.0.0:50051")
+	lis, err := net.Listen("tcp", "0.0.0.0:443")
 	if err != nil {
-		log.Fatalf("Failed to listen on port 50051: %v", err)
+		log.Fatalf("Failed to listen on port 443: %v", err)
 	}
 
 	s := grpc.NewServer(

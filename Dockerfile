@@ -29,7 +29,6 @@ COPY --from=builder /app/grpc-server .
 COPY envoy.yaml .
 
 # Expose the port that the service will run on
-EXPOSE 50051
-
+EXPOSE 443
 # Command to run the executable
 CMD ["./grpc-server"]
