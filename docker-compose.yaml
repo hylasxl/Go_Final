@@ -1,0 +1,12 @@
+version: '3'
+services:
+  grpc-server:
+    build: .
+    ports:
+      - "50051:50051"
+  gateway-envoy:
+    image: envoyproxy/envoy:v1.28.0
+    volumes:
+      - ./envoy.yaml:/etc/envoy/envoy.yaml
+    ports:
+      - "50052:50051"

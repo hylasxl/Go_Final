@@ -10,7 +10,7 @@ RUN go mod download
 
 # Copy source code and build the application
 COPY . .
-RUN go build -o go_final cmd/server/main.go
+RUN go build -o go_final
 
 # Stage 2: Run
 FROM alpine:3.20
