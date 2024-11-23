@@ -3,14 +3,7 @@ services:
     name: grpc-service
     env: docker
     plan: free
-    docker:
-      dockerfilePath: ./Dockerfile
     autoDeploy: true
-    healthCheckPath: /health
-    healthCheckInterval: 5s
-    healthCheckTimeout: 2s
-    healthCheckSuccessThreshold: 2
-    healthCheckFailureThreshold: 3
     envVars:
       - key: DBUser
         value: flight_management_user
