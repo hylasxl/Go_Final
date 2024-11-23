@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: grpc-service
+    env: docker
+    plan: free
+    docker:
+      dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /health
+    healthCheckInterval: 5s
+    healthCheckTimeout: 2s
+    healthCheckSuccessThreshold: 2
+    healthCheckFailureThreshold: 3
+    envVars:
+      - key: DBUser
+        value: flight_management_user
+      - key: DBPassword
+        value: LOgbBjq58lYaKccwLYZCYWqAUmwPxYOh
+      - key: DBName
+        value: flight_management
+      - key: DBHost
+        value: dpg-csu6fea3esus73c82i60-a.singapore-postgres.render.com
+      - key: DBPort
+        value: "5432"
