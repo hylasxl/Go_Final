@@ -1,6 +1,8 @@
 package main
 
 import (
+	"Go_gRPC/config"
+	"Go_gRPC/internal/db"
 	"Go_gRPC/internal/services"
 	"Go_gRPC/pb/airlinepb"
 	"Go_gRPC/pb/airportpb"
@@ -10,19 +12,15 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"log"
 	"net"
-	"os"
-	"os/signal"
+	"net/http"
 	"strings"
-	"syscall"
-
-	"Go_gRPC/config"
-	"Go_gRPC/internal/db"
 
 	"Go_gRPC/pkg/utils"
 	"github.com/golang-jwt/jwt/v4"
@@ -43,38 +41,41 @@ type server struct {
 func main() {
 	cfg := config.LoadConfig()
 	ctx := context.Background()
+
+	// Database setup
 	database, err := db.ConnectDB(cfg)
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	//if err := db.MigrateDB(database); err != nil {
-	//	log.Fatalf("failed to migrate database: %v", err)
-	//}
-	// Ignore the second return value
-	// Initialize the Redis client using parsed URL components
+	// Redis setup
 	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true, // For skipping verification of the server's certificate
+		InsecureSkipVerify: true,
 	}
 	rdb := redis.NewClient(&redis.Options{
-		Username: "red-csur2pt6l47c73813ojg",
-		Addr:     "singapore-redis.render.com:6379", // Redis server host and port
-		Password: "WEYmIIgtoa8o8Fw0BadV70y7sUFpU3yP",
-		// Redis password (if any)
-		DB:        0,         // Default database (0)
-		TLSConfig: tlsConfig, // Enable TLS for secure connection (required for rediss://)
+		Username:  "red-csur2pt6l47c73813ojg",
+		Addr:      "singapore-redis.render.com:6379",
+		Password:  "WEYmIIgtoa8o8Fw0BadV70y7sUFpU3yP",
+		DB:        0,
+		TLSConfig: tlsConfig,
 	})
-	pong, err := rdb.Ping(ctx).Result()
-	if err != nil {
+	if _, err := rdb.Ping(ctx).Result(); err != nil {
 		log.Fatalf("Could not connect to Redis: %v", err)
 	}
-	fmt.Println(pong) // Should print "PONG" if connected successfully
-	fixedIP := ""
+
+	// Start gRPC server
+	go startGRPCServer(database, rdb)
+
+	// Start Gin HTTP server
+	startGinServer()
+}
+
+func startGRPCServer(database *gorm.DB, rdb *redis.Client) {
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
 	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
+		log.Fatalf("Failed to listen on port 50051: %v", err)
 	}
-	grpc.EnableTracing = true
+
 	s := grpc.NewServer(
 		grpc.MaxRecvMsgSize(100*1024*1024),
 		grpc.UnaryInterceptor(AuthInterceptor()),
@@ -90,32 +91,46 @@ func main() {
 	flightService := &services.FlightService{DB: database, Redis: rdb}
 	flightpb.RegisterFlightServiceServer(s, flightService)
 
+	// Register reflection for gRPC server
 	reflection.Register(s)
-	addrs, err := net.InterfaceAddrs()
-	if err != nil {
-		log.Fatalf("failed to get network interfaces: %v", err)
+
+	log.Println("gRPC server is running on 0.0.0.0:50051")
+	if err := s.Serve(lis); err != nil {
+		log.Fatalf("Failed to serve gRPC server: %v", err)
 	}
-	for _, addr := range addrs {
-		if ipNet, ok := addr.(*net.IPNet); ok && !ipNet.IP.IsLoopback() && ipNet.IP.To4() != nil {
-			fmt.Printf("Server is running on IP: %s\n", ipNet.IP.String())
+}
+
+func startGinServer() {
+	router := gin.Default()
+
+	// Define routes
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Welcome to the Gin HTTP server!",
+		})
+	})
+
+	router.POST("/login", func(c *gin.Context) {
+		// Example route for login
+		var loginRequest struct {
+			Username string `json:"username"`
+			Password string `json:"password"`
 		}
-	}
+		if err := c.ShouldBindJSON(&loginRequest); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		// Implement your login logic here
+		c.JSON(http.StatusOK, gin.H{"message": "Login successful"})
+	})
+
+	// Start Gin server
 	go func() {
-		log.Println("Starting gRPC server on " + fixedIP + ":50051")
-		if err := s.Serve(lis); err != nil {
-			log.Fatalf("failed to serve: %v", err)
+		if err := router.Run("0.0.0.0:8080"); err != nil {
+			log.Fatalf("Failed to start Gin server: %v", err)
 		}
 	}()
-
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
-	<-ctx.Done()
-	log.Println("Shutting down server...")
-
-	s.GracefulStop()
-
-	log.Println("Server stopped gracefully")
 }
 
 func AuthInterceptor() grpc.UnaryServerInterceptor {
